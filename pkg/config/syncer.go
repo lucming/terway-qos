@@ -151,6 +151,7 @@ func (s *Syncer) DeletePod(id string) error {
 }
 
 func (s *Syncer) UpdatePod(config *types.PodConfig) error {
+	//log.Info("111111111111 UpdatePod")
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
@@ -176,29 +177,35 @@ func (s *Syncer) UpdatePod(config *types.PodConfig) error {
 		}
 	} else {
 		// new pod
+		log.Info("-----------new pod")
 		cg, err := s.cgroup.GetCgroupByPodUID(config.PodUID)
 		if err != nil {
+			//log.Info("-----------failed to get cg", "err", err, "pod uid", config.PodUID)
 			return err
 		}
+		log.Info("", "cg", cg)
 		config.CgroupInfo = cg
 	}
 
 	if prio != nil && *prio <= 2 {
 		config.CgroupInfo.ClassID = *prio
 	}
-
+	//log.Info("-----------before s.podCache.Update")
 	err = s.podCache.Update(config)
 	if err != nil {
 		return err
 	}
 
+	//log.Info("-------before s.cgroup.SetCgroupClassID")
 	if config.HostNetwork && config.Prio != nil {
+		log.Info("-------ready to s.cgroup.SetCgroupClassID")
 		err = s.cgroup.SetCgroupClassID(*config.Prio, config.CgroupInfo.Path)
 		if err != nil {
 			return err
 		}
 	}
 
+	log.Info("-------before s.bpf.WritePodInfo")
 	return s.bpf.WritePodInfo(config)
 }
 
@@ -276,6 +283,7 @@ func (s *Syncer) syncCgroupRate() error {
 		err = s.bpf.DeleteCgroupRate(id)
 		if err != nil {
 			log.Error(err, "delete cgruop rate failed", "id", strconv.Itoa(int(id)))
+			continue
 		}
 	}
 

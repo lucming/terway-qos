@@ -79,9 +79,11 @@ func NewCgroup() *Cgroup {
 
 func (f *Cgroup) GetCgroupByPodUID(id string) (*types.CgroupInfo, error) {
 	v, ok := f.cache.Get(id)
+	log.Info("aaaaaa")
 	if !ok {
 		// update all cache
 		result := f.getCgroupPath()
+		//log.Info("$$$$$$$$result", "cfpath", result)
 		for uid, info := range result {
 			f.cache.Add(uid, info, defaultTTL)
 		}
@@ -149,6 +151,7 @@ func (f *Cgroup) getCgroupPath() map[string]types.CgroupInfo {
 
 	for _, p := range f.workPath {
 		path := filepath.Join(f.cgroupPath, p)
+		log.Info("^^^^^^^^", "path", path)
 		entries, err := os.ReadDir(path)
 		if os.IsNotExist(err) {
 			continue

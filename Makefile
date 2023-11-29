@@ -51,4 +51,5 @@ generate:
 	-e BPF_CLANG="$(CLANG)" \
 	-e BPF_CFLAGS="$(CFLAGS)" \
 	-e $BPF_STRIP="$(STRIP)" \
+	-e GOPROXY='https://goproxy.cn,direct' \
 	$(BPF_BUILD_IMAGE) go generate ./...

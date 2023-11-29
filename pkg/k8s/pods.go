@@ -23,7 +23,6 @@ import (
 
 	"github.com/AliyunContainerService/terway-qos/pkg/bandwidth"
 	"github.com/AliyunContainerService/terway-qos/pkg/types"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/fields"
@@ -35,6 +34,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
@@ -50,7 +50,9 @@ func init() {
 
 func StartPodHandler(ctx context.Context, syncer types.SyncPod) error {
 	options := ctrl.Options{
-		Scheme: scheme,
+		Scheme:             scheme,
+		MetricsBindAddress: ":8081",
+		LeaderElection:     false,
 	}
 
 	options.NewCache = cache.BuilderWithOptions(cache.Options{
@@ -58,7 +60,8 @@ func StartPodHandler(ctx context.Context, syncer types.SyncPod) error {
 			&corev1.Pod{}: {
 				Field: fields.SelectorFromSet(fields.Set{"spec.nodeName": os.Getenv("K8S_NODE_NAME")}),
 			},
-		}},
+		},
+	},
 	)
 	mgr, err := ctrl.NewManager(config.GetConfigOrDie(), options)
 	if err != nil {
@@ -96,24 +99,32 @@ func (r *reconcilePod) Reconcile(ctx context.Context, request reconcile.Request)
 	}, &pod)
 	if err != nil {
 		if errors.IsNotFound(err) {
+			//log.Log.Info("1pod not found", "ns", request.Namespace, "name", request.Name)
 			return reconcile.Result{}, r.syncer.DeletePod(request.String())
 		}
+		//log.Log.Info("2++++++++++++pod get err", "err", err, "ns", request.Namespace, "name", request.Name)
 		return reconcile.Result{}, err
 	}
+	log.Log.Info("3++++++++++++afetr get pod")
+
 	if !pod.DeletionTimestamp.IsZero() {
 		return reconcile.Result{}, r.syncer.DeletePod(request.String())
 	}
+
+	log.Log.Info("4++++++++++++before getIPs")
 
 	v4, v6 := getIPs(&pod)
 	if !v4.IsValid() && !v6.IsValid() {
 		return reconcile.Result{}, fmt.Errorf("pod %s/%s has no ip", pod.Namespace, pod.Name)
 	}
 
+	log.Log.Info("5++++++++++++before ExtractPodBandwidthResources")
 	ingress, egress, err := bandwidth.ExtractPodBandwidthResources(pod.Annotations)
 	if err != nil {
 		return reconcile.Result{}, fmt.Errorf("error extract bandwidth resources, %w", err)
 	}
 
+	log.Log.Info("6++++++++++++before update")
 	update := &types.PodConfig{
 		PodID:       fmt.Sprintf("%s/%s", pod.Namespace, pod.Name),
 		PodUID:      string(pod.UID),
@@ -142,12 +153,25 @@ func (r *reconcilePod) Reconcile(ctx context.Context, request reconcile.Request)
 			return &a
 		}(0)
 	}
-
+	log.Log.Info("7++++++++++++before r.syncer.UpdatePod")
 	return reconcile.Result{}, r.syncer.UpdatePod(update)
 }
 
 func getIPs(pod *corev1.Pod) (v4 netip.Addr, v6 netip.Addr) {
 	if len(pod.Status.PodIPs) == 2 {
+		//addr, _ := netip.ParseAddr(pod.Status.PodIPs[0].IP)
+		//if addr.Is4() {
+		//	v4 = addr
+		//} else {
+		//	v6 = addr
+		//}
+		//addr, _ = netip.ParseAddr(pod.Status.PodIPs[1].IP)
+		//if addr.Is4() {
+		//	v4 = addr
+		//} else {
+		//	v6 = addr
+		//}
+
 		for _, podip := range pod.Status.PodIPs {
 			addr, _ := netip.ParseAddr(podip.IP)
 			if addr.Is4() {

@@ -102,6 +102,7 @@ func updateIfNotEqual(expect any, idx uint32, lookupo func(idx uint32) (any, err
 		return nil
 	}
 
+	log.Info("************map", "prev", prev, "expect", expect)
 	return update(idx, expect)
 }
 

@@ -93,6 +93,7 @@ func getBpfObj(enableCORE bool) *qos_tcObjects {
 				log.Error(err, "load bpf objects failed")
 				os.Exit(1)
 			}
+			//log.Info(">>>>>>>>>>ebpf prog", "spec", spec)
 			err = spec.LoadAndAssign(objs, opts)
 			if err != nil {
 				log.Error(err, "load bpf objects failed")
@@ -132,6 +133,38 @@ func (m *Mgr) Start(ctx context.Context) error {
 		return err
 	}
 	for _, link := range links {
+		//log.Info("++++++++++++ link info", "name", link.Attrs().Name, "idx", link.Attrs().Index)
+		err = m.ensureBpfProg(link)
+		if err != nil {
+			log.Error(err, "attach bpf prog failed")
+			return err
+		}
+	}
+
+	err = netlink.LinkSubscribe(m.nlEvent, ctx.Done())
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		for e := range m.nlEvent {
+			err = m.ensureBpfProg(e.Link)
+			if err != nil {
+				log.Error(err, "attach bpf prog failed")
+			}
+		}
+	}()
+
+	return nil
+}
+
+func (m *Mgr) detachBpfProg(ctx context.Context) error {
+	links, err := netlink.LinkList()
+	if err != nil {
+		return err
+	}
+	for _, link := range links {
+		//log.Info("++++++++++++ link info", "name", link.Attrs().Name, "idx", link.Attrs().Index)
 		err = m.ensureBpfProg(link)
 		if err != nil {
 			log.Error(err, "attach bpf prog failed")
@@ -164,6 +197,7 @@ func (m *Mgr) Close() {
 
 func (m *Mgr) ensureBpfProg(link netlink.Link) error {
 	if !m.validate(link) {
+		log.Info("link unvalid", "name", link.Attrs().Name)
 		return nil
 	}
 

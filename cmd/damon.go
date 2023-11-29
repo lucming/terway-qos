@@ -83,6 +83,10 @@ func daemon() error {
 	if err != nil {
 		return err
 	}
+	defer func() {
+
+	}()
+
 	m, err := bpf.NewMap()
 	if err != nil {
 		return err
