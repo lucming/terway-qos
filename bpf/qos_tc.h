@@ -132,7 +132,7 @@ struct {
 	__uint(value_size, sizeof(struct global_rate_cfg));
 	__uint(max_entries, 2);
 	__uint(pinning, LIBBPF_PIN_BY_NAME);
-} terway_g_cfg SEC(".maps");
+} terway_cfg SEC(".maps");
 
 struct {
 	__uint(type, BPF_MAP_TYPE_ARRAY);
