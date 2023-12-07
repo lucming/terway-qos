@@ -18,12 +18,12 @@ BEGIN
 	@monitor_interval = (uint64)1000;
 }
 
-//tracepoint:net:net_dev_start_xmit
-kprobe:start_xmit
+tracepoint:net:net_dev_start_xmit
+// kprobe:start_xmit
 {
-	//$skb = ((struct sk_buff *)args->skbaddr);
-    $skb = ((struct sk_buff *)arg0);
-
+	$skb = ((struct sk_buff *)args->skbaddr);
+    //$skb = ((struct sk_buff *)arg0);
+    printf("%d;", $skb->priority);
     $interval = (nsecs - @start)/1000000;
 
     if ($interval >= @sample_interval) {

@@ -67,7 +67,7 @@ type qos_tcMapSpecs struct {
 	GlobalRateMap   *ebpf.MapSpec `ebpf:"global_rate_map"`
 	PodMap          *ebpf.MapSpec `ebpf:"pod_map"`
 	QosProgMap      *ebpf.MapSpec `ebpf:"qos_prog_map"`
-	TerwayGlobalCfg *ebpf.MapSpec `ebpf:"terway_global_cfg"`
+	TerwayGlobalCfg *ebpf.MapSpec `ebpf:"terway_g_cfg"`
 	TerwayNetStat   *ebpf.MapSpec `ebpf:"terway_net_stat"`
 }
 
@@ -94,7 +94,7 @@ type qos_tcMaps struct {
 	GlobalRateMap   *ebpf.Map `ebpf:"global_rate_map"`
 	PodMap          *ebpf.Map `ebpf:"pod_map"`
 	QosProgMap      *ebpf.Map `ebpf:"qos_prog_map"`
-	TerwayGlobalCfg *ebpf.Map `ebpf:"terway_global_cfg"`
+	TerwayGlobalCfg *ebpf.Map `ebpf:"terway_g_cfg"`
 	TerwayNetStat   *ebpf.Map `ebpf:"terway_net_stat"`
 }
 

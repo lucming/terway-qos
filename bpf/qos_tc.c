@@ -502,7 +502,7 @@ int qos_global(struct __sk_buff *skb) {
 	__u32 direction                 = get_direction(skb);
 
 	// load current level rate info
-	g_cfg = bpf_map_lookup_elem(&terway_global_cfg, &direction);
+	g_cfg = bpf_map_lookup_elem(&terway_g_cfg, &direction);
 	if (g_cfg == NULL)
 		return TC_ACT_OK;
 
