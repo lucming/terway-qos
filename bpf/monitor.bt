@@ -23,7 +23,7 @@ tracepoint:net:net_dev_start_xmit
 {
 	$skb = ((struct sk_buff *)args->skbaddr);
     //$skb = ((struct sk_buff *)arg0);
-    printf("%d;", $skb->priority);
+    // printf("%d;", $skb->priority);
     $interval = (nsecs - @start)/1000000;
 
     if ($interval >= @sample_interval) {

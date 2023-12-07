@@ -27,6 +27,14 @@
 #define PROG_TC_CGROUP 0
 #define PROG_TC_GLOBAL 1
 
+// #define FEAT_EDT 1
+#define bpfprint(fmt, ...)                        \
+    ({                                             \
+        char ____fmt[] = fmt;                      \
+        bpf_trace_printk(____fmt, sizeof(____fmt), \
+                         ##__VA_ARGS__);           \
+    })
+
 struct rate_info {
 	__u64 bps;
 	__u64 t_last;

@@ -63,12 +63,12 @@ type qos_tcProgramSpecs struct {
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type qos_tcMapSpecs struct {
-	CgroupRateMap   *ebpf.MapSpec `ebpf:"cgroup_rate_map"`
-	GlobalRateMap   *ebpf.MapSpec `ebpf:"global_rate_map"`
-	PodMap          *ebpf.MapSpec `ebpf:"pod_map"`
-	QosProgMap      *ebpf.MapSpec `ebpf:"qos_prog_map"`
-	TerwayGlobalCfg *ebpf.MapSpec `ebpf:"terway_g_cfg"`
-	TerwayNetStat   *ebpf.MapSpec `ebpf:"terway_net_stat"`
+	CgroupRateMap *ebpf.MapSpec `ebpf:"cgroup_rate_map"`
+	GlobalRateMap *ebpf.MapSpec `ebpf:"global_rate_map"`
+	PodMap        *ebpf.MapSpec `ebpf:"pod_map"`
+	QosProgMap    *ebpf.MapSpec `ebpf:"qos_prog_map"`
+	TerwayG_cfg   *ebpf.MapSpec `ebpf:"terway_g_cfg"`
+	TerwayNetStat *ebpf.MapSpec `ebpf:"terway_net_stat"`
 }
 
 // qos_tcObjects contains all objects after they have been loaded into the kernel.
@@ -90,12 +90,12 @@ func (o *qos_tcObjects) Close() error {
 //
 // It can be passed to loadQos_tcObjects or ebpf.CollectionSpec.LoadAndAssign.
 type qos_tcMaps struct {
-	CgroupRateMap   *ebpf.Map `ebpf:"cgroup_rate_map"`
-	GlobalRateMap   *ebpf.Map `ebpf:"global_rate_map"`
-	PodMap          *ebpf.Map `ebpf:"pod_map"`
-	QosProgMap      *ebpf.Map `ebpf:"qos_prog_map"`
-	TerwayGlobalCfg *ebpf.Map `ebpf:"terway_g_cfg"`
-	TerwayNetStat   *ebpf.Map `ebpf:"terway_net_stat"`
+	CgroupRateMap *ebpf.Map `ebpf:"cgroup_rate_map"`
+	GlobalRateMap *ebpf.Map `ebpf:"global_rate_map"`
+	PodMap        *ebpf.Map `ebpf:"pod_map"`
+	QosProgMap    *ebpf.Map `ebpf:"qos_prog_map"`
+	TerwayG_cfg   *ebpf.Map `ebpf:"terway_g_cfg"`
+	TerwayNetStat *ebpf.Map `ebpf:"terway_net_stat"`
 }
 
 func (m *qos_tcMaps) Close() error {
@@ -104,7 +104,7 @@ func (m *qos_tcMaps) Close() error {
 		m.GlobalRateMap,
 		m.PodMap,
 		m.QosProgMap,
-		m.TerwayGlobalCfg,
+		m.TerwayG_cfg,
 		m.TerwayNetStat,
 	)
 }
