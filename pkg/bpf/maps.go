@@ -57,13 +57,13 @@ func NewMap() (*Writer, error) {
 func (w *Writer) GetGlobalConfig() (*types.GlobalConfig, *types.GlobalConfig, error) {
 	ingress := &globalRateCfg{}
 	egress := &globalRateCfg{}
-	err := w.obj.TerwayGlobalCfg.Lookup(ingressIndex, ingress)
+	err := w.obj.TerwayCfg.Lookup(ingressIndex, ingress)
 	if err != nil {
 		if !errors.Is(err, ebpf.ErrKeyNotExist) {
 			return nil, nil, err
 		}
 	}
-	err = w.obj.TerwayGlobalCfg.Lookup(egressIndex, egress)
+	err = w.obj.TerwayCfg.Lookup(egressIndex, egress)
 	if err != nil {
 		if !errors.Is(err, ebpf.ErrKeyNotExist) {
 			return nil, nil, err
@@ -139,7 +139,7 @@ func (w *Writer) WriteGlobalConfig(ingress *types.GlobalConfig, egress *types.Gl
 
 	lookRateFunc := func(idx uint32) (any, error) {
 		prev := &globalRateCfg{}
-		err := w.obj.TerwayGlobalCfg.Lookup(idx, prev)
+		err := w.obj.TerwayCfg.Lookup(idx, prev)
 		return prev, err
 	}
 
@@ -149,7 +149,7 @@ func (w *Writer) WriteGlobalConfig(ingress *types.GlobalConfig, egress *types.Gl
 			egressIndex:  "egress",
 		}
 		log.Info("write global config", idxtostr[idx], egress.String())
-		return w.obj.TerwayGlobalCfg.Put(idx, rateCfg)
+		return w.obj.TerwayCfg.Put(idx, rateCfg)
 	}
 
 	if err := updateIfNotEqual(ingressCfg, ingressIndex, lookRateFunc, updateRateFunc); err != nil {
