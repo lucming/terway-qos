@@ -52,7 +52,7 @@ static __always_inline void cal_rate(__u64 len, __u32 direction) {
 		WRITE_ONCE(meta->ts, now);
 		WRITE_ONCE(meta->val, 0);
 		index++;
-	} else if ((index + 1) % 10 == 0) {
+	} else if (index % 10 == 0) {
 		index = meta_index + 1;
 	}
 
@@ -93,12 +93,11 @@ static __always_inline __u64 get_average_rate(__u32 direction) {
 	__u32 i;
 	__u64 now      = bpf_ktime_get_ns();
 	__u64 cur_rate = 0;
-	__u32 index    = index_shift(direction);
 
     #pragma unroll
 	for (i = 0; i < 9; i++) {
 		struct net_stat *info;
-		index += i;
+		__u32 index = index_shift(direction) + i;
 
 		info = bpf_map_lookup_elem(&terway_net_stat, &index);
 		if (info == NULL)
@@ -398,7 +397,7 @@ int qos_cgroup(struct __sk_buff *skb) {
 	// 1. look up ip in cgroup_rate_limit_cfg ( container )
 	// 2. host network will not support per pod limit... ,just set class_id as priority
 	// 3. for container, will add per pod rate limit
-
+    bpf_printk("++++++++qos_cgroup");
 	void *data          = (void *)(long)skb->data;
 	struct ethhdr *l2   = data;
 	struct ip_addr addr = {0};
@@ -496,6 +495,7 @@ int qos_cgroup(struct __sk_buff *skb) {
 
 SEC("tc/qos_global")
 int qos_global(struct __sk_buff *skb) {
+    bpf_printk("++++++++qos_global");
 	struct global_rate_cfg *g_cfg   = NULL;
 	struct global_rate_info *g_info = NULL;
 	int ret                         = TC_ACT_OK;
@@ -545,9 +545,7 @@ int qos_global(struct __sk_buff *skb) {
 
 SEC("tc/qos_prog_ingress")
 int qos_prog_ingress(struct __sk_buff *skb) {
-//    char msg[] = "++++++++ingress";
-//    bpf_trace_printk(msg, sizeof(msg));
-    bpfprint("++++++++ingress");
+    bpf_printk("++++++++qos_prog_ingress");
 
 	mark_ingress(skb);
 
@@ -558,9 +556,7 @@ int qos_prog_ingress(struct __sk_buff *skb) {
 
 SEC("tc/qos_prog_egress")
 int qos_prog_egress(struct __sk_buff *skb) {
-//    char msg[] = "++++++++egress";
-//    bpf_trace_printk(msg, sizeof(msg));
-    bpfprint("++++++++egress");
+    bpf_printk("++++++++qos_prog_egress");
 
 	mark_egress(skb);
 
